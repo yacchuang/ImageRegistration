@@ -2,9 +2,9 @@ import SimpleITK as sitk
 import nibabel as nib
 import numpy as np
 import os
-from tkinter import tk
-import gui
-import registration_gui as rgui
+# from tkinter import tk
+# import gui
+# import registration_gui as rgui
 
 ## Data path
 T1Address = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/T1.nii'
@@ -13,38 +13,10 @@ PCFAddress = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/PCFExt
 CineAddress ="/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/CineAllTimestep/"
 TimeSteps = 21
 
-## Load T1 and Cine images
-# T1 images: whole brain and PCF mask
-T1image = sitk.ReadImage(T1Address)
-BSimage = sitk.ReadImage(BrainStemAddress)
-PCFimage = sitk.ReadImage(PCFAddress)
-
-T1imageNP = nib.load(T1Address).get_fdata()
-T1imageShape = T1imageNP.shape
+OUTPUT_DIR = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/Registered/'
 
 
-# Cine images (stacked all time points)
-CineImageNP = nib.load(CineAddress+"WholeVolume_Time1.nii").get_fdata()
-CineImageShape = CineImageNP.shape
-CineFinalShape = np.append(CineImageShape, TimeSteps)
-CineStacked = np.zeros(CineFinalShape)
-CineData =os.listdir(CineAddress)
-# print(CineData)
-
-Time = 0
-
-for EachCine in CineData:
-    EachCineNP = nib.load(CineAddress+EachCine).get_fdata()
-    CineStacked[:, :, :, Time] = EachCineNP
-    Time = Time + 1
-    
-    
-# Save stacked 4D Cine to disk
-nifti = nib.Nifti1Image(CineStacked, None)
-nib.save(nifti, os.path.join(CineAddress, "CineAllTime.nii.gz"))
-        
    
-    
 ## Registration
 
 fixed = sitk.ReadImage(CineAddress+"WholeVolume_Time1.nii", sitk.sitkFloat32)
@@ -64,6 +36,36 @@ initial_transform = sitk.CenteredTransformInitializer(fixed, moving, sitk.Euler3
                                                       sitk.CenteredTransformInitializerFilter.GEOMETRY)
 
 registration_method = sitk.ImageRegistrationMethod()
+# Similarity metric settings.
+registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
+registration_method.SetMetricSamplingStrategy(registration_method.RANDOM)
+registration_method.SetMetricSamplingPercentage(0.01)
+
+registration_method.SetInterpolator(sitk.sitkLinear)
+
+# Optimizer settings.
+registration_method.SetOptimizerAsGradientDescent(learningRate=1.0, numberOfIterations=100, convergenceMinimumValue=1e-6, convergenceWindowSize=10)
+#registration_method.SetOptimizerScalesFromPhysicalShift()
+
+# Setup for the multi-resolution framework.            
+#registration_method.SetShrinkFactorsPerLevel(shrinkFactors = [4,2,1])
+#registration_method.SetSmoothingSigmasPerLevel(smoothingSigmas=[2,1,0])
+#registration_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
+
+# Don't optimize in-place, we would possibly like to run this cell multiple times.
+registration_method.SetInitialTransform(initial_transform, inPlace=False)
+
+# # Connect all of the observers so that we can perform plotting during registration.
+# registration_method.AddCommand(sitk.sitkStartEvent, rgui.start_plot)
+# registration_method.AddCommand(sitk.sitkEndEvent, rgui.end_plot)
+# registration_method.AddCommand(sitk.sitkMultiResolutionIterationEvent, rgui.update_multires_iterations) 
+# registration_method.AddCommand(sitk.sitkIterationEvent, lambda: rgui.plot_values(registration_method))
+
+final_transform = registration_method.Execute(fixed, moving)
+
+# Always check the reason optimization terminated.
+print('Final metric value: {0}'.format(registration_method.GetMetricValue()))
+print('Optimizer\'s stopping condition, {0}'.format(registration_method.GetOptimizerStopConditionDescription()))
     
 # Translation to Rigid (3D)
 # Rotation to Rigid (3D)
@@ -76,5 +78,8 @@ registration_method = sitk.ImageRegistrationMethod()
 # set different output directory
 
 ## Reading and Writing
+moving_resampled = sitk.Resample(moving, fixed, final_transform, sitk.sitkLinear, 0.0, moving.GetPixelID())
+sitk.WriteImage(moving_resampled, os.path.join(OUTPUT_DIR, 'T1_resampled.mha'))
+sitk.WriteTransform(final_transform, os.path.join(OUTPUT_DIR, 'Cine_2_mr_T1.tfm'))
 
 
