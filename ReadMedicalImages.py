@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug 10 15:13:54 2022
+
+@author: kurtlab
+"""
+
 import SimpleITK as sitk
 import nibabel as nib
 import numpy as np
@@ -42,39 +50,3 @@ for EachCine in CineData:
 # Save stacked 4D Cine to disk
 nifti = nib.Nifti1Image(CineStacked, None)
 nib.save(nifti, os.path.join(CineAddress, "CineAllTime.nii.gz"))
-        
-   
-    
-## Registration
-
-fixed = sitk.ReadImage(CineAddress+"WholeVolume_Time1.nii", sitk.sitkFloat32)
-moving = sitk.ReadImage(T1Address, sitk.sitkFloat32) 
-
-# # View images on GUI
-# window = tk.Tk()
-# Cine_window = [80, 216]
-# T1_window = [256, 256]
-
-# gui.MultiImageDisplay(image_list = [fixed, moving],
-#                       title_list = ['fixed', 'moving'], figure_size = (8, 4), window_level_list=[Cine_window, T1_window])
-
-
-# Transformation method: Align the centers of the two volumes
-initial_transform = sitk.CenteredTransformInitializer(fixed, moving, sitk.Euler3DTransform(), 
-                                                      sitk.CenteredTransformInitializerFilter.GEOMETRY)
-
-registration_method = sitk.ImageRegistrationMethod()
-    
-# Translation to Rigid (3D)
-# Rotation to Rigid (3D)
-# Rigid to similarity (3D)
-# Similarity to Affine
-# BSpline transformation
-# Displacement Field
-
-# Images and resampling:
-# set different output directory
-
-## Reading and Writing
-
-

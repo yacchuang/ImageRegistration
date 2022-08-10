@@ -97,4 +97,4 @@ def save_segmentation(seg, cid, output_path):
     # nifti.get_data_dtype() = seg.dtype
     # Save segmentation to disk
     nib.save(nifti, os.path.join(output_path,
-                                 "prediction_" + str(cid).zfill(5) + ".nii.gz")
+                                 "prediction_" + str(cid).zfill(5) + ".nii.gz"))
