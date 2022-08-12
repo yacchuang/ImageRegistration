@@ -2,7 +2,9 @@ import SimpleITK as sitk
 import nibabel as nib
 import numpy as np
 import os
-# from tkinter import tk
+import volumentations
+from volumentations import *
+# import tkinter as tk
 # import gui
 # import registration_gui as rgui
 
@@ -19,17 +21,56 @@ OUTPUT_DIR = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/Registered/'
    
 ## Registration
 
-fixed = sitk.ReadImage(CineAddress+"WholeVolume_Time1.nii", sitk.sitkFloat32)
-moving = sitk.ReadImage(T1Address, sitk.sitkFloat32) 
-
-# # View images on GUI
+# View images on GUI
 # window = tk.Tk()
 # Cine_window = [80, 216]
 # T1_window = [256, 256]
 
 # gui.MultiImageDisplay(image_list = [fixed, moving],
 #                       title_list = ['fixed', 'moving'], figure_size = (8, 4), window_level_list=[Cine_window, T1_window])
+'''
+patch_size = (256, 256, 256)   # T1 image
 
+
+def get_augmentation(patch_size):
+    return Compose([
+        # RemoveEmptyBorder(always_apply=True),
+        # RandomScale((0.8, 1.2)),
+        # PadIfNeeded(patch_size, always_apply=True),
+        # RandomCrop(patch_size, always_apply=True),
+        # CenterCrop(patch_size, always_apply=True),
+        # RandomCrop(patch_size, always_apply=True),
+        # Resize(patch_size, interpolation=1, resize_type=0, always_apply=True, p=1.0),
+        # CropNonEmptyMaskIfExists(patch_size, always_apply=True),
+        # Normalize(always_apply=True),
+        # ElasticTransform((0, 0.25)),
+        # Rotate((0, 0), (0, 0), (-180, 180)),
+        # Flip(0, p=0.5),
+        # Flip(1),
+        # Flip(2),
+        Transpose((1,2,0)), # only if patch.height = patch.width
+        RandomRotate90((0,1)),
+        # RandomGamma(),
+        # GaussianNoise(),
+    ], p=1)
+
+aug = get_augmentation(patch_size)
+
+fixed_NP = nib.load(CineAddress+"WholeVolume_Time1.nii").get_fdata()
+moving_NP = nib.load(T1Address).get_fdata()
+
+data = {'image': moving_NP}
+aug_data = aug(**data)
+moving_NP = aug_data['image']
+T1_aug = sitk.GetImageFromArray(moving_NP)
+
+sitk.WriteImage(T1_aug, os.path.join(OUTPUT_DIR, 'T1_aug.nii'))
+
+T1AugAddress = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/T1_aug.nii'
+'''
+
+fixed = sitk.ReadImage(CineAddress+"WholeVolume_Time1.nii", sitk.sitkFloat32)
+moving = sitk.ReadImage(T1Address, sitk.sitkFloat32) 
 
 # Transformation method: Align the centers of the two volumes
 initial_transform = sitk.CenteredTransformInitializer(fixed, moving, sitk.Euler3DTransform(), 
@@ -79,7 +120,7 @@ print('Optimizer\'s stopping condition, {0}'.format(registration_method.GetOptim
 
 ## Reading and Writing
 moving_resampled = sitk.Resample(moving, fixed, final_transform, sitk.sitkLinear, 0.0, moving.GetPixelID())
-sitk.WriteImage(moving_resampled, os.path.join(OUTPUT_DIR, 'T1_resampled.mha'))
+sitk.WriteImage(moving_resampled, os.path.join(OUTPUT_DIR, 'T1_resampled.nii'))
 sitk.WriteTransform(final_transform, os.path.join(OUTPUT_DIR, 'Cine_2_mr_T1.tfm'))
 
 
