@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="08b06f57-df0d-4c69-aa82-6be7d534d585" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ReadMedicalImages.py" beforeDir="false" afterPath="$PROJECT_DIR$/ReadMedicalImages.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/T1CineRegistration.py" beforeDir="false" afterPath="$PROJECT_DIR$/T1CineRegistration.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -39,7 +40,28 @@
     &quot;last_opened_file_path&quot;: &quot;/Users/kurtlab/Documents/GitHub/ImageRegistration&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.ReadMedicalImages">
+    <configuration name="ReadMedicalImages" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="ImageRegistration" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/PycharmProjects/pythonProject/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ReadMedicalImages.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="T1CineRegistration" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="ImageRegistration" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -83,5 +105,23 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ReadMedicalImages.py</url>
+          <line>45</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

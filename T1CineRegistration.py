@@ -86,15 +86,20 @@ registration_method.SetInterpolator(sitk.sitkLinear)
 
 # Optimizer settings.
 registration_method.SetOptimizerAsGradientDescent(learningRate=1.0, numberOfIterations=100, convergenceMinimumValue=1e-6, convergenceWindowSize=10)
-#registration_method.SetOptimizerScalesFromPhysicalShift()
+registration_method.SetOptimizerScalesFromPhysicalShift()
 
 # Setup for the multi-resolution framework.            
-#registration_method.SetShrinkFactorsPerLevel(shrinkFactors = [4,2,1])
-#registration_method.SetSmoothingSigmasPerLevel(smoothingSigmas=[2,1,0])
-#registration_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
+registration_method.SetShrinkFactorsPerLevel(shrinkFactors = [4,2,1])
+registration_method.SetSmoothingSigmasPerLevel(smoothingSigmas=[2,1,0])
+registration_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
 
-# Don't optimize in-place, we would possibly like to run this cell multiple times.
-registration_method.SetInitialTransform(initial_transform, inPlace=False)
+# Set the initial moving and optimized transforms.
+optimized_transform = sitk.Euler3DTransform()    
+registration_method.SetMovingInitialTransform(initial_transform)
+registration_method.SetInitialTransform(optimized_transform, inPlace=False)
+
+# # Don't optimize in-place, we would possibly like to run this cell multiple times.
+# registration_method.SetInitialTransform(initial_transform, inPlace=False)
 
 # # Connect all of the observers so that we can perform plotting during registration.
 # registration_method.AddCommand(sitk.sitkStartEvent, rgui.start_plot)
@@ -102,7 +107,8 @@ registration_method.SetInitialTransform(initial_transform, inPlace=False)
 # registration_method.AddCommand(sitk.sitkMultiResolutionIterationEvent, rgui.update_multires_iterations) 
 # registration_method.AddCommand(sitk.sitkIterationEvent, lambda: rgui.plot_values(registration_method))
 
-final_transform = registration_method.Execute(fixed, moving)
+final_transform_v4 = sitk.CompositeTransform([registration_method.Execute(fixed, moving), initial_transform])
+# final_transform = registration_method.Execute(fixed, moving)
 
 # Always check the reason optimization terminated.
 print('Final metric value: {0}'.format(registration_method.GetMetricValue()))
@@ -119,7 +125,7 @@ print('Optimizer\'s stopping condition, {0}'.format(registration_method.GetOptim
 # set different output directory
 
 ## Reading and Writing
-moving_resampled = sitk.Resample(moving, fixed, final_transform, sitk.sitkLinear, 0.0, moving.GetPixelID())
+moving_resampled = sitk.Resample(moving, fixed, final_transform_v4, sitk.sitkLinear, 0.0, moving.GetPixelID())
 sitk.WriteImage(moving_resampled, os.path.join(OUTPUT_DIR, 'T1_resampled.nii'))
 sitk.WriteTransform(final_transform, os.path.join(OUTPUT_DIR, 'Cine_2_mr_T1.tfm'))
 
