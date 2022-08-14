@@ -9,7 +9,7 @@ from volumentations import *
 # import registration_gui as rgui
 
 ## Data path
-T1Address = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/T1.nii'
+T1Address = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/T1_reoriented.nii'
 BrainStemAddress = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/brainstemSsLabels.v12.FSvoxelSpace.nii'
 PCFAddress = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/PCFExtractLabel.nii'
 CineAddress ="/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/CineAllTimestep/"
@@ -127,6 +127,6 @@ print('Optimizer\'s stopping condition, {0}'.format(registration_method.GetOptim
 ## Reading and Writing
 moving_resampled = sitk.Resample(moving, fixed, final_transform_v4, sitk.sitkLinear, 0.0, moving.GetPixelID())
 sitk.WriteImage(moving_resampled, os.path.join(OUTPUT_DIR, 'T1_resampled.nii'))
-sitk.WriteTransform(final_transform, os.path.join(OUTPUT_DIR, 'Cine_2_mr_T1.tfm'))
+sitk.WriteTransform(final_transform_v4, os.path.join(OUTPUT_DIR, 'Cine_2_mr_T1.tfm'))
 
 

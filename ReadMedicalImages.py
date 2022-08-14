@@ -33,9 +33,9 @@ PCFimage = sitk.ReadImage(PCFAddress)
 # Reorient T1 images
 T1imageNP = nib.load(T1Address).get_fdata()
 T1imageTensor = torch.from_numpy(T1imageNP)
-T1imagePermute = torch.permute(T1imageTensor, (1, 2, 0))
+T1imagePermute = torch.permute(T1imageTensor, (0, 2, 1))
 T1imagePermuteNP = T1imagePermute.cpu().detach().numpy()
-T1imageFinal = cv2.flip(T1imagePermuteNP, 0)
+T1imageFinal = cv2.flip(T1imagePermuteNP, 1)
 T1imageShape = T1imageFinal.shape
 
 # Save Reoriented T1 to disk
