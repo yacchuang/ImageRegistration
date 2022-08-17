@@ -1,10 +1,6 @@
 import SimpleITK as sitk
-import nibabel as nib
-import numpy as np
 import os
-import volumentations
 from volumentations import *
-# import tkinter as tk
 # import gui
 # import registration_gui as rgui
 
@@ -15,7 +11,7 @@ PCFAddress = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/PCFExt
 CineAddress ="/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/CineAllTimestep/"
 TimeSteps = 21
 
-OUTPUT_DIR = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/Registered/'
+OUTPUT_DIR = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/RegisteredITK/'
 
 
    
@@ -28,46 +24,7 @@ OUTPUT_DIR = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/Registered/'
 
 # gui.MultiImageDisplay(image_list = [fixed, moving],
 #                       title_list = ['fixed', 'moving'], figure_size = (8, 4), window_level_list=[Cine_window, T1_window])
-'''
-patch_size = (256, 256, 256)   # T1 image
 
-
-def get_augmentation(patch_size):
-    return Compose([
-        # RemoveEmptyBorder(always_apply=True),
-        # RandomScale((0.8, 1.2)),
-        # PadIfNeeded(patch_size, always_apply=True),
-        # RandomCrop(patch_size, always_apply=True),
-        # CenterCrop(patch_size, always_apply=True),
-        # RandomCrop(patch_size, always_apply=True),
-        # Resize(patch_size, interpolation=1, resize_type=0, always_apply=True, p=1.0),
-        # CropNonEmptyMaskIfExists(patch_size, always_apply=True),
-        # Normalize(always_apply=True),
-        # ElasticTransform((0, 0.25)),
-        # Rotate((0, 0), (0, 0), (-180, 180)),
-        # Flip(0, p=0.5),
-        # Flip(1),
-        # Flip(2),
-        Transpose((1,2,0)), # only if patch.height = patch.width
-        RandomRotate90((0,1)),
-        # RandomGamma(),
-        # GaussianNoise(),
-    ], p=1)
-
-aug = get_augmentation(patch_size)
-
-fixed_NP = nib.load(CineAddress+"WholeVolume_Time1.nii").get_fdata()
-moving_NP = nib.load(T1Address).get_fdata()
-
-data = {'image': moving_NP}
-aug_data = aug(**data)
-moving_NP = aug_data['image']
-T1_aug = sitk.GetImageFromArray(moving_NP)
-
-sitk.WriteImage(T1_aug, os.path.join(OUTPUT_DIR, 'T1_aug.nii'))
-
-T1AugAddress = '/Users/kurtlab/Desktop/Image_registration/ChiariSubj1/NIFTI/T1_aug.nii'
-'''
 
 fixed = sitk.ReadImage(CineAddress+"WholeVolume_Time1.nii", sitk.sitkFloat32)
 moving = sitk.ReadImage(T1Address, sitk.sitkFloat32) 
@@ -107,26 +64,17 @@ registration_method.SetInitialTransform(optimized_transform, inPlace=False)
 # registration_method.AddCommand(sitk.sitkMultiResolutionIterationEvent, rgui.update_multires_iterations) 
 # registration_method.AddCommand(sitk.sitkIterationEvent, lambda: rgui.plot_values(registration_method))
 
-final_transform_v4 = sitk.CompositeTransform([registration_method.Execute(fixed, moving), initial_transform])
-# final_transform = registration_method.Execute(fixed, moving)
+final_transform_v4 = sitk.CompositeTransform([registration_method.Execute(fixed, moving), initial_transform])   # ITKv4 Coordinate Systems
+# final_transform = registration_method.Execute(fixed, moving)   # classic registration doesn't work
 
 # Always check the reason optimization terminated.
 print('Final metric value: {0}'.format(registration_method.GetMetricValue()))
 print('Optimizer\'s stopping condition, {0}'.format(registration_method.GetOptimizerStopConditionDescription()))
     
-# Translation to Rigid (3D)
-# Rotation to Rigid (3D)
-# Rigid to similarity (3D)
-# Similarity to Affine
-# BSpline transformation
-# Displacement Field
-
-# Images and resampling:
-# set different output directory
 
 ## Reading and Writing
-moving_resampled = sitk.Resample(moving, fixed, final_transform_v4, sitk.sitkLinear, 0.0, moving.GetPixelID())
+moving_resampled = sitk.Resample(moving, fixed, final_transform, sitk.sitkLinear, 0.0, moving.GetPixelID())
 sitk.WriteImage(moving_resampled, os.path.join(OUTPUT_DIR, 'T1_resampled.nii'))
-sitk.WriteTransform(final_transform_v4, os.path.join(OUTPUT_DIR, 'Cine_2_mr_T1.tfm'))
+sitk.WriteTransform(final_transform, os.path.join(OUTPUT_DIR, 'Cine_2_mr_T1.tfm'))
 
 
